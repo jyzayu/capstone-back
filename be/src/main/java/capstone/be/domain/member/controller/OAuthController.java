@@ -21,6 +21,10 @@ public class OAuthController {
         System.out.println("author code = "+ code);
         String access_Token = oAuthService.getToken(code);
 
+
+        // 일치하는 snsId가 없을 시 회원가입(해당 snsId로 kakaologin을 했을때 null반환하면 회원가입)
+
+        // 일치하는 snsId가 있으면 멤버객체에 담음
         return null;
 
     }

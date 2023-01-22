@@ -7,7 +7,10 @@ import org.springframework.stereotype.Service;
 
 import java.io.*;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 @RequiredArgsConstructor
 @Service
@@ -35,7 +38,6 @@ public class OAuthService {
             bw.write(sb.toString());
             bw.flush();
 
-            System.out.println("2");
 
             int responseCode = conn.getResponseCode();
             System.out.println("responseCode = " + responseCode);
@@ -55,7 +57,6 @@ public class OAuthService {
             System.out.println("access_Token = " + access_Token);
             System.out.println("refresh_Token = " + refresh_Token);
 
-            System.out.println("3");
             bw.close();
             br.close();
         } catch (IOException e) {
@@ -64,4 +65,30 @@ public class OAuthService {
         return access_Token;
     }
 
+
+    public Map<String, Object> getUserInfo(String access_token) {
+        Map<String, Object> map = new HashMap<>();
+        String read_line = "";
+        String result = "";
+        String reqURL = "https://kapi.kakao.com/v2/user/update_profile";
+        try {
+            URL url = new URL(reqURL);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+
+            conn.setRequestProperty("Authorization","Bearer" + access_token);
+            int responseCode = conn.getResponseCode();
+            System.out.println("responseCode = " + responseCode);
+
+            BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            while ((read_line = br.readLine()) != null) {
+                result += read_line;
+            }
+
+            System.out.println("response = " + result);
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
