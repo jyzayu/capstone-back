@@ -1,8 +1,11 @@
 package capstone.be.domain.member.service;
 
 import capstone.be.domain.member.repository.MemberRepository;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import lombok.RequiredArgsConstructor;
-import org.json.JSONObject;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
@@ -41,18 +44,13 @@ public class OAuthService {
 
             int responseCode = conn.getResponseCode();
             System.out.println("responseCode = " + responseCode);
-
             BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-            String line = "";
-            String result = "";
-            while ((line = br.readLine()) != null) {
-                result += line;
-            }
-            System.out.println("response body" + result);
 
-            JSONObject jsonObject = new JSONObject(result);
-            access_Token = jsonObject.getString("access_token");
-            refresh_Token = jsonObject.getString("refresh_token");
+
+
+            JsonElement jsonElement = JsonParser.parseReader(br);
+            access_Token = jsonElement.getAsJsonObject().get("access_token").getAsString();
+            refresh_Token = jsonElement.getAsJsonObject().get("refresh_token").getAsString();
 
             System.out.println("access_Token = " + access_Token);
             System.out.println("refresh_Token = " + refresh_Token);
@@ -70,25 +68,38 @@ public class OAuthService {
         Map<String, Object> map = new HashMap<>();
         String read_line = "";
         String result = "";
-        String reqURL = "https://kapi.kakao.com/v2/user/update_profile";
+        String reqURL = "https://kapi.kakao.com/v2/user/me";
         try {
             URL url = new URL(reqURL);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
 
-            conn.setRequestProperty("Authorization","Bearer" + access_token);
+            conn.setRequestProperty("Authorization","Bearer " + access_token);
             int responseCode = conn.getResponseCode();
             System.out.println("responseCode = " + responseCode);
 
             BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-            while ((read_line = br.readLine()) != null) {
-                result += read_line;
-            }
+            JsonElement element = JsonParser.parseReader(br);
+            System.out.println("response = " + element);
 
-            System.out.println("response = " + result);
+
+            JsonObject kakao_account = element.getAsJsonObject().get("kakao_account").getAsJsonObject();
+            JsonObject properties = element.getAsJsonObject().get("properties").getAsJsonObject();
+            String snsId = element.getAsJsonObject().get("id").getAsString();
+            // Todo : 연령, 성별 동의 항목
+//            int age = properties.get("age").getAsInt();
+            String email = kakao_account.get("email").getAsString();
+
+
+//            map.put("age", age);
+            map.put("email", email);
+            // 회원가입 여부를 확인할 snsId
+            map.put("snsId", snsId);
 
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        return map;
     }
+
 }
