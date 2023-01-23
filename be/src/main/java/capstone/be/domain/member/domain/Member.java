@@ -3,11 +3,7 @@ package capstone.be.domain.member.domain;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-
+import javax.persistence.*;
 
 
 @Getter
@@ -18,18 +14,28 @@ public class Member {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column
+    private String snsId;
+
+
+//    회원가입시 입력할 정보 4개
     @Setter
+    @Column(nullable = false, length = 20)
     private String nickname;
 
-//    재직여부
     @Setter
+    @Column(nullable = false)
     private boolean employed;
 
-////    희망분야  Enum으로 구현?
+//    Todo : 희망분야  Enum으로 구현?
 //    @Setter
 //    private Category category;
 
     @Setter
     private int desiredSalary;
-    
+
+//  Todo : 연령, 성별 선택사항 필드 추가
+
+
+
 }
